@@ -2,6 +2,7 @@ const { Pool } = require('pg');
 const { nanoid } = require('nanoid');
 const InvariantError = require('../../exceptions/InvariantError');
 const NotFoundError = require('../../exceptions/NotFoundError');
+const { mapAlbumDBToModel } = require('../../utils');
 
 class AlbumsService {
   constructor() {
@@ -64,6 +65,26 @@ class AlbumsService {
     if (!result.rows.length) {
       throw new NotFoundError('album gagal dihapus, ID tidak ditemukan');
     }
+  }
+
+  async getAlbumWithSongs(albumId) {
+    const query = {
+      text: `
+        SELECT 
+          albums.id AS album_id, albums.name, albums.year,
+          songs.id, songs.title, songs.performer
+        FROM albums
+        LEFT JOIN songs ON albums.id = songs.album_id`,
+      values: [albumId],
+    };
+
+    const result = await this._pool.query(query);
+
+    if (!result.rows.length) {
+      throw new NotFoundError('Album tidak ditemukan');
+    }
+
+    return result.rows.map(mapAlbumDBToModel)[0];
   }
 }
 

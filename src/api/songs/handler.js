@@ -27,7 +27,17 @@ class SongsHandler {
 
   async getSongsHandler(request) {
     const { title, performer } = request.query;
-    const songs = await this._service.getSongs();
+    let songs;
+
+    if (title && performer) {
+      songs = await this._service.getSongs(title, performer);
+    } else if (title) {
+      songs = await this._service.getSongs(title);
+    } else if (performer) {
+      songs = await this._service.getSongs(undefined, performer);
+    } else {
+      songs = await this._service.getSongs();
+    }
 
     return {
       status: 'success',
@@ -68,7 +78,7 @@ class SongsHandler {
     await this._service.deleteSongById(id);
     return {
       status: 'success',
-      message: 'Lagu berhasi dihapus',
+      message: 'Lagu berhasi diperbarui',
     };
   }
 }

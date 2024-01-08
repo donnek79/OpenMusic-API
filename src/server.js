@@ -55,7 +55,6 @@ const init = async () => {
           message: response.message,
         });
         newResponse.code(response.statusCode);
-        if (response.statusCode === 404) return newResponse;
         return newResponse;
       }
 

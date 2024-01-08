@@ -29,32 +29,28 @@ class SongsService {
   }
 
   async getSongs(title, performer) {
-    if (title && performer) {
-      const query = {
-        text: 'SELECT id, title, performer FROM songs WHERE title ILIKE $1 And performer ILIKE $2',
-        value: [`%${title}%, %${performer}%`],
-      };
-      const result = await this._pool.query(query);
-      return result.rows;
+    let queryText = 'SELECT id, title, performer FROM songs WHERE 1=1';
+    const queryValues = [];
+
+    if (title) {
+      queryText += ' AND title ILIKE $1';
+      queryValues.push(`%${title}%`);
     }
 
-    if (title || performer) {
-      const query = {
-        text: 'SELECT id, title, performer FROM songs WHERE title ILIKE $1 And performer ILIKE $2',
-        value: [`%${title}%, %${performer}%`],
-      };
-      const result = await this._pool.query(query);
-      return result.rows;
+    if (performer) {
+      queryText += title ? ' AND' : ''; // add AND if title is present
+      queryText += ' AND title ILIKE $2';
+      queryValues.push(`%${performer}%`);
     }
 
-    const result = await this._pool.query('SELECT id, title, performer FROM songs');
+    const result = await this._pool.query(queryText, queryValues);
     return result.rows;
   }
 
   async getSongById(id) {
     const query = {
       text: 'SELECT * FROM songs WHERE id = $1',
-      value: [id],
+      values: [id],
     };
 
     const result = await this._pool.query(query);
@@ -70,7 +66,7 @@ class SongsService {
     title, year, performer, genre, duration, albumId,
   }) {
     const query = {
-      text: 'UPDATE songs SET title = $1, year = $2, performer = $3, genre = $4, duration, = $5, "albumId" = $6 WHERE id = $7 RETURNING id',
+      text: 'UPDATE songs SET title = $1, year = $2, performer = $3, genre = $4, duration = $5, album_id = $6 WHERE id = $7 RETURNING id',
       values: [title, year, performer, genre, duration, albumId, id],
     };
 
