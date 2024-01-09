@@ -40,7 +40,6 @@ class AlbumsService {
 
     const album = albumResult.rows[0];
 
-    // ambil lagu yg punya album_id yg sama
     const songsQuery = {
       text: 'SELECT * FROM songs WHERE album_id = $1',
       values: [id],
@@ -63,7 +62,7 @@ class AlbumsService {
 
     const result = await this._pool.query(query);
 
-    if (!result.rows.length) {
+    if (!result.rowCount) {
       throw new NotFoundError('Gagal memperbarui album, ID tidak ditemukan');
     }
   }
