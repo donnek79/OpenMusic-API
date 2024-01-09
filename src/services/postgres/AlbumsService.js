@@ -27,18 +27,32 @@ class AlbumsService {
   }
 
   async getAlbumById(id) {
-    const query = {
+    const albumQuery = {
       text: 'SELECT * FROM albums WHERE id = $1',
       values: [id],
     };
 
-    const result = await this._pool.query(query);
+    const albumResult = await this._pool.query(albumQuery);
 
-    if (!result.rows.length) {
+    if (!albumResult.rows.length) {
       throw new NotFoundError('Album gagal ditemukan');
     }
 
-    return result.rows[0];
+    const album = albumResult.rows[0];
+
+    // ambil lagu yg punya album_id yg sama
+    const songsQuery = {
+      text: 'SELECT * FROM songs WHERE album_id = $1',
+      values: [id],
+    };
+
+    const songsResult = await this._pool.query(songsQuery);
+    const songs = songsResult.rows;
+
+    // attach the songs to the album object
+    album.songs = songs;
+
+    return album;
   }
 
   async editAlbumById(id, { name, year }) {
@@ -65,26 +79,6 @@ class AlbumsService {
     if (!result.rows.length) {
       throw new NotFoundError('album gagal dihapus, ID tidak ditemukan');
     }
-  }
-
-  async getAlbumWithSongs(albumId) {
-    const query = {
-      text: `
-        SELECT 
-          albums.id AS album_id, albums.name, albums.year,
-          songs.id, songs.title, songs.performer
-        FROM albums
-        LEFT JOIN songs ON albums.id = songs.album_id`,
-      values: [albumId],
-    };
-
-    const result = await this._pool.query(query);
-
-    if (!result.rows.length) {
-      throw new NotFoundError('Album tidak ditemukan');
-    }
-
-    return result.rows.map(mapAlbumDBToModel)[0];
   }
 }
 
