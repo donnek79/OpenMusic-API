@@ -1,5 +1,5 @@
-const routes = require('../users/routes');
 const PlaylistsHandler = require('./handler');
+const routes = require('./routes');
 
 module.exports = {
   name: 'playlists',
