@@ -53,7 +53,7 @@ class PlaylistsService {
   }
 
   async addSongToPlaylist(playlistId, songId) {
-    const id = `playlist-${nanoid(16)}`;
+    const id = nanoid(16);
 
     const query = {
       text: 'INSERT INTO playlist_songs VALUES($1, $2, $3) RETURNING id',
@@ -79,7 +79,12 @@ class PlaylistsService {
     };
 
     const result = await this._pool.query(query);
-    return result.rows;
+
+    if (!result.rows.length) {
+      throw new NotFoundError('Playlist tidak ditemukan');
+    }
+
+    return result.rows[0];
   }
 
   async deleteSongFromPlaylist(playlistId, songId) {
@@ -95,10 +100,10 @@ class PlaylistsService {
     }
   }
 
-  async verifyPlaylistOwner(id, owner) {
+  async verifyPlaylistOwner(playlistId, owner) {
     const query = {
       text: 'SELECT * FROM playlists WHERE id = $1',
-      values: [id],
+      values: [playlistId],
     };
 
     const result = await this._pool.query(query);
