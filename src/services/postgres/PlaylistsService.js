@@ -73,13 +73,12 @@ class PlaylistsService {
     const query = {
       text: `SELECT songs.id, songs.title, songs.performer
       FROM playlist_songs
-      LEFT JOIN songs ON songs.id = playlists_songs.song_id
+      INNER JOIN songs ON songs.id = playlist_songs.song_id
       WHERE playlist_songs.playlist_id = $1`,
       values: [playlistId],
     };
 
     const result = await this._pool.query(query);
-
     return result.rows;
   }
 
@@ -115,9 +114,9 @@ class PlaylistsService {
     }
   }
 
-  async verifyPlaylistAccess(playlistId, songId) {
+  async verifyPlaylistAccess(playlistId, userId) {
     try {
-      await this.verifyPlaylistOwner(playlistId, songId);
+      await this.verifyPlaylistOwner(playlistId, userId);
     } catch (error) {
       if (error instanceof NotFoundError) {
         throw error;
