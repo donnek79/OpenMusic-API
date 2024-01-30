@@ -69,13 +69,22 @@ class PlaylistsService {
     return result.rows[0].id;
   }
 
-  async getSongsInPlaylist(playlistId) {
+  async getSongsInPlaylist(id) {
     const query = {
-      text: `SELECT songs.id, songs.title, songs.performer
-      FROM playlist_songs
-      INNER JOIN songs ON songs.id = playlist_songs.song_id
-      WHERE playlist_songs.playlist_id = $1`,
-      values: [playlistId],
+      text: `SELECT playlists.id, playlists.name, users.username,
+      ARRAY_AGG(
+        JSON_BUILD_OBJECT(
+          'id', songs.id,
+          'title', songs.title,
+          'performer', songs.performer
+        ) ORDER BY songs.title ASC ) songs
+        FROM playlist_songs
+        INNER JOIN playlists ON playlist_songs.playlist_id = playlists.id
+        INNER JOIN users ON playlists.owner = users.id
+        INNER JOIN songs ON playlist_songs.song_id = songs.id
+        WHERE playlist_id = $1
+        GROUP BY playlists.id, users.username`,
+      values: [id],
     };
 
     const result = await this._pool.query(query);
