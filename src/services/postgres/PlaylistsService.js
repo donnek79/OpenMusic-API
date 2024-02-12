@@ -144,6 +144,31 @@ class PlaylistsService {
       }
     }
   }
+
+  async getActivity(playlistId) {
+    const query = {
+      text: `SELECT playlists.id,
+      ARRAY_AGG(
+        JSON_BUILD_OBJECT(
+          'username', users.username,
+          'title', songs.title,
+          'action', playlist_song_activities.action,
+          'time', playlist_song_activities.time
+        )) activities
+        FROM playlist_song_activities
+        INNER JOIN playlists ON playlist_song_activities.playlist_id = playlists.id
+        INNER JOIN users ON playlists.owner = users.id
+        INNER JOIN songs ON playlist_songs.song_id = songs.id
+        WHERE playlist_id = $1`,
+      values: [playlistId],
+    };
+
+    const result = await this._pool.query(query);
+
+    if (!result.rowCount) {
+      throw new NotFoundError('Aktifitas tidak ditemukan');
+    }
+  }
 }
 
 module.exports = PlaylistsService;

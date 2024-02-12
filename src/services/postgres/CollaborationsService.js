@@ -3,11 +3,13 @@ const { Pool } = require('pg');
 const InvariantError = require('../../exceptions/InvariantError');
 
 class CollaborationsService {
-  constructor() {
+  constructor(usersService) {
     this._pool = new Pool();
+    this._usersService = usersService;
   }
 
   async addCollaboration(playlistId, userId) {
+    await this._usersService.verifyUserInDatabase(userId);
     const id = `collab-${nanoid(16)}`;
 
     const query = {

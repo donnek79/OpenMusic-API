@@ -11,7 +11,7 @@ class ActivitiesService {
     const time = new Date().toISOString();
 
     const query = {
-      text: 'INSERT INTO playlist_song_activities VALUES($1, $2, $3, $4, $5)',
+      text: 'INSERT INTO playlist_song_activities VALUES($1, $2, $3, $4, $5, $6)',
       values: [id, playlistId, songId, userId, 'add', time],
     };
 
@@ -23,7 +23,7 @@ class ActivitiesService {
     const time = new Date().toISOString();
 
     const query = {
-      text: 'INSERT INTO playlist_song_activities VALUES($1, $2, $3, $4, $5)',
+      text: 'INSERT INTO playlist_song_activities VALUES($1, $2, $3, $4, $5, $6)',
       values: [id, playlistId, songId, userId, 'delete', time],
     };
 
