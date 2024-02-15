@@ -46,11 +46,15 @@ const uploads = require('./api/uploads');
 const StorageService = require('./services/storage/StorageService');
 const UploadsValidator = require('./validator/uploads');
 
+// cache
+const CacheService = require('./services/redis/CacheService');
+
 const init = async () => {
-  const albumsService = new AlbumsService();
+  const cacheService = new CacheService();
+  const albumsService = new AlbumsService(cacheService);
   const songsService = new SongsService();
-  const usersService = new UsersService();
   const authenticationsService = new AuthenticationsService();
+  const usersService = new UsersService();
   const collaborationsService = new CollaborationsService();
   const playlistsService = new PlaylistsService(collaborationsService);
   const storageService = new StorageService(path.resolve(__dirname, 'api/uploads/file/images'));
@@ -151,6 +155,7 @@ const init = async () => {
       plugin: uploads,
       options: {
         service: storageService,
+        albumService: albumsService,
         validator: UploadsValidator,
       },
     },

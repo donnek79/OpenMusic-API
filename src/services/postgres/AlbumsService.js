@@ -6,8 +6,9 @@ const ClientError = require('../../exceptions/ClientError');
 const { mapAlbumDBToModel } = require('../../utils');
 
 class AlbumsService {
-  constructor() {
+  constructor(cacheService) {
     this._pool = new Pool();
+    this._cacheService = cacheService;
   }
 
   async addAlbum({ name, year }) {
@@ -158,6 +159,19 @@ class AlbumsService {
         likes: parseInt(rows[0].count, 10),
         cache: false,
       };
+    }
+  }
+
+  async checkExistedAlbums(id) {
+    const query = {
+      text: 'SELECT id FROM albums WHERE id = $1',
+      values: [id],
+    };
+
+    const { rowCount } = await this._pool.query(query);
+
+    if (!rowCount) {
+      throw new NotFoundError('Id tidak ditemukan.');
     }
   }
 }
